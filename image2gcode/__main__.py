@@ -186,7 +186,7 @@ def main() -> int:
     # on the safe side: laser stop, fan on, laser on while moving
     gcode_header = "M5\n" + "M8\n" + "M3\n" if args.constantburn else "M4\n"
     # laser off, fan off, go back to origin, program stop
-    gcode_footer = "\nM5\n" + "M9\nG90\nG1 S0\nG0 X0 Y0\n" + "M2\n"
+    gcode_footer = "\nG1 S0\nM5\nM9\nG90\nG0 X0 Y0\nM2\n"
 
     # create image conversion object
     convert = Image2gcode()
