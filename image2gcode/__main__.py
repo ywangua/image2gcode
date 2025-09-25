@@ -86,7 +86,7 @@ def main() -> int:
         "noise_default" : 0,
         "overscan_default" : 0,
         "invert_default" : True,
-        "constantburn_default" : True,
+        "constantburn_default" : False,
         "onedirectionscan_default" : False,
     }
 
@@ -185,8 +185,8 @@ def main() -> int:
 
     # on the safe side: laser stop, fan on, laser on while moving
     gcode_header = "M5\n" + "M8\n" + "M3\n" if args.constantburn else "M4\n"
-    # laser off, fan off, program stop
-    gcode_footer = "M5\n" + "M9\n" + "M2\n"
+    # laser off, fan off, go back to origin, program stop
+    gcode_footer = "\nM5\n" + "M9\nG90\nG1 S0\nG0 X0 Y0\n" + "M2\n"
 
     # create image conversion object
     convert = Image2gcode()
