@@ -72,6 +72,9 @@ def loadImage(args: Namespace) -> NDArray[Shape["*,*"], UInt8]:
 
     return None
 
+def thresholdImage(img: NDArray, threshold: int=100) -> NDArray[Shape["*,*"], UInt8]:
+    return img
+
 def main() -> int:
     """
     main
@@ -88,6 +91,7 @@ def main() -> int:
         "invert_default" : True,
         "constantburn_default" : False,
         "onedirectionscan_default" : False,
+        "threshold_default": -1,
     }
 
     if os.path.exists(config_file):
@@ -106,6 +110,8 @@ def main() -> int:
         type=float, help="pixel size in mm (XY-axis): each image pixel is drawn this size")
     parser.add_argument('--speed', default=cfg["speed_default"], metavar="<default:" + str(cfg["speed_default"])+">",
         type=int, help='draw speed in mm/min')
+    parser.add_argument('--threshold', default=cfg["threshold_default"], metavar="<default:" + str(cfg["threshold_default"])+">",
+        type=int, help='threshold to convert image to binary (1-254: threshold; -1 or 0: do not apply threshold)')
     parser.add_argument('--maxpower', default=cfg["power_default"], metavar="<default:" +str(cfg["power_default"])+ ">",
         type=int, help="maximum laser power while drawing (as a rule of thumb set to 1/3 of the maximum of a machine having a 5W laser)")
     parser.add_argument('--poweroffset', default=cfg["poweroffset_default"], metavar="<default:" +str(cfg["poweroffset_default"])+ ">",
@@ -162,7 +168,10 @@ def main() -> int:
 
     # load and convert image to B&W
     # flip image updown because Gcode and raster image coordinate system differ in this respect
-    narr = np.flipud(loadImage(args))
+    img = loadImage(args)
+    if args.threshold > 0:
+        img = (img>args.threshold)*255
+    narr = np.flipud(img)
 
     if args.center:
         args.offset = (-round((narr.shape[1] * args.pixelsize)/2,1), -round((narr.shape[0] * args.pixelsize)/2,1))
